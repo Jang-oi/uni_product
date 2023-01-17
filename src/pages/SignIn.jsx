@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import {useState} from "react";
 import {useCookies} from "react-cookie";
+import {serviceCall} from "../utils/callUtil";
 
 const SignIn = () => {
 
@@ -27,7 +28,7 @@ const SignIn = () => {
     const onLoginInfoHandler = (e) => {
         setLoginInfo({
             ...loginInfo,
-            [e.currentTarget.name] : e.currentTarget.value
+            [e.currentTarget.name]: e.currentTarget.value
         });
     }
 
@@ -51,12 +52,12 @@ const SignIn = () => {
      */
     const onSubmitHandler = async (e) => {
         e.preventDefault();
-        /*        const signInData = {
-                    _id     : id,
-                    password: pw
-                }*/
+        const signInData = {
+            url : '/auth/login',
+            data : {id, pw},
+        }
         if (isSave) setCookie('saveId', id, {maxAge: cookieMaxAge});
-
+        serviceCall.post(signInData);
     }
 
 

@@ -9,6 +9,7 @@ import Main from "./pages/Main";
 import SignIn from "./pages/SignIn";
 import PublicRoute from "./router/PublicRoute";
 import PrivateRoute from "./router/PrivateRoute";
+import Calendar from "./pages/Calendar";
 
 const App = () => {
 
@@ -42,6 +43,7 @@ const App = () => {
             <Menubar/>
             {loading && <Loading/>}
             <Routes>
+                <Route path="/Calendar" element={<Calendar/>}/>
                 <Route path="/" element={<PrivateRoute/>}>
                     <Route path="/" element={<Main/>}/>
                 </Route>
