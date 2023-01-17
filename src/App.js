@@ -6,6 +6,9 @@ import axios from "axios";
 import Loading from "./component/Loding";
 import Menubar from "./component/Menubar";
 import Main from "./pages/Main";
+import SignIn from "./pages/SignIn";
+import PublicRoute from "./router/PublicRoute";
+import PrivateRoute from "./router/PrivateRoute";
 
 const App = () => {
 
@@ -39,7 +42,12 @@ const App = () => {
             <Menubar/>
             {loading && <Loading/>}
             <Routes>
-                <Route path="/" element={<Main/>}/>
+                <Route path="/" element={<PrivateRoute/>}>
+                    <Route path="/" element={<Main/>}/>
+                </Route>
+                <Route path="/" element={<PublicRoute/>}>
+                    <Route path="/sign-in" element={<SignIn/>}/>
+                </Route>
             </Routes>
         </Container>
     );
