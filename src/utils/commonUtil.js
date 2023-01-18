@@ -1,4 +1,4 @@
-import Swal from 'sweetalert2'
+import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
 /**
@@ -21,7 +21,7 @@ import withReactContent from 'sweetalert2-react-content';
 export const customAlert = (options) => {
     const MySwal = withReactContent(Swal);
     return MySwal.fire(options);
-}
+};
 
 /**
  * 오브젝트의 키 값이 존재하더라도 value 값이 0, null, '', undefined 일 경우
@@ -38,7 +38,7 @@ export const isEmptyObj = (obj) => {
         }
     }
     return bool;
-}
+};
 
 /**
  * 숫자 세자리 컴마와 소수점 두자리 반올림
@@ -46,12 +46,12 @@ export const isEmptyObj = (obj) => {
  */
 export const setLocaleString = (obj) => {
     const option = {
-        maximumFractionDigits: 2
+        maximumFractionDigits: 2,
     };
 
     for (const key in obj) {
         if (typeof obj[key] === 'number') {
-            obj[key] = obj[key].toLocaleString('ko-KR', option)
+            obj[key] = obj[key].toLocaleString('ko-KR', option);
         }
     }
-}
+};

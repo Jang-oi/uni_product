@@ -1,4 +1,4 @@
-import {Fragment} from "react";
+import { Fragment } from 'react';
 
 
 const Manage = () => {
@@ -7,6 +7,6 @@ const Manage = () => {
             관리자
         </Fragment>
     );
-}
+};
 
 export default Manage;

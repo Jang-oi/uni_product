@@ -1,25 +1,26 @@
-import {Fragment, useState} from "react";
+import { Fragment, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import {styled} from '@mui/material/styles';
+import { serviceCall } from '../utils/callUtil';
+
+import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import CssBaseline from '@mui/material/CssBaseline';
 import Divider from '@mui/material/Divider';
-
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import {Collapse, List, ListItemButton, ListItemText} from "@mui/material";
-import {ExpandLess, ExpandMore} from "@mui/icons-material";
-import {useNavigate} from "react-router-dom";
+import { Collapse, List, ListItemButton, ListItemText } from '@mui/material';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 
 // LeftMenuWidth 값
 const drawerWidth = 300;
 
-const Main = styled('main', {shouldForwardProp: (prop) => prop !== 'open'})(
-    ({theme, open}) => ({
+const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
+    ({ theme, open }) => ({
         flexGrow  : 1,
         padding   : theme.spacing(3),
         transition: theme.transitions.create('margin', {
@@ -39,7 +40,7 @@ const Main = styled('main', {shouldForwardProp: (prop) => prop !== 'open'})(
 
 const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== 'open',
-})(({theme, open}) => ({
+})(({ theme, open }) => ({
     transition: theme.transitions.create(['margin', 'width'], {
         easing  : theme.transitions.easing.sharp,
         duration: theme.transitions.duration.leavingScreen,
@@ -54,7 +55,7 @@ const AppBar = styled(MuiAppBar, {
     }),
 }));
 
-const DrawerHeader = styled('div')(({theme}) => ({
+const DrawerHeader = styled('div')(({ theme }) => ({
     display   : 'flex',
     alignItems: 'center',
     padding   : theme.spacing(0, 1),
@@ -64,47 +65,41 @@ const DrawerHeader = styled('div')(({theme}) => ({
 }));
 
 const Menubar = () => {
-
-    const fetchData = {
-        menu1     : [
-            {menuName: '달력', component: 'Calendar', nodeKey: 1},
-            {menuName: '리얼그리드', component: 'RealGrid', nodeKey: 2},
-        ],
-        menu2     : [
-            {menuName: '생성', component: 'RealGridCreate', nodeKey: 2},
-            {menuName: '조회', component: 'RealGridRead', nodeKey: 2}
-        ],
-    }
-
     const navigate = useNavigate();
-    const {menu1, menu2} = fetchData;
 
-    const [open, setOpen] = useState(false);
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [menuData, setMenuData] = useState({});
+    const [menuOpen, setMenuOpen] = useState({});
+
     const handleDrawerOpen = () => {
-        setOpen(true);
+        setDrawerOpen(true);
     };
+
     const handleDrawerClose = () => {
-        setOpen(false);
+        setDrawerOpen(false);
     };
 
-    const [menuOpen, setMenuOpen] = useState({
-        nodeKey1: false,
-        nodeKey2: false,
-    });
-
-    const onMenu1Handler = (menu1Value) => {
-        const {nodeKey, component} = menu1Value;
-        const isMenu2 = menu2.some(data => {
-            return data.nodeKey === nodeKey
+    useEffect(() => {
+        const menuOptions = {
+            url: '/getMenu',
+        };
+        serviceCall.post(menuOptions, (returnData) => {
+            setMenuData(returnData);
         });
+    }, []);
 
-        if (isMenu2) {
+
+    const { menu1 = [], menu2 = [] } = menuData;
+    const onMenu1Handler = (menu1Value) => {
+        const { nodeKey, component } = menu1Value;
+
+        if (hasMenu2(nodeKey)) {
             const key = `nodeKey${nodeKey}`;
             const isOpen = menuOpen[`nodeKey${nodeKey}`];
 
             setMenuOpen({
                 ...menuOpen,
-                [key]: !isOpen
+                [key]: !isOpen,
             });
         } else {
             navigate(`/${component}`);
@@ -113,8 +108,18 @@ const Menubar = () => {
 
     const onMenu2Handler = (menu2Value) => {
         navigate(`/${menu2Value.component}`);
-    }
+    };
 
+    /**
+     * 하위 메뉴가 있는지 체크
+     * @param nodeKey
+     * @returns {*}
+     */
+    const hasMenu2 = (nodeKey) => {
+        return menu2.some(data => {
+            return data.nodeKey === nodeKey;
+        });
+    };
 
     /**
      * 메뉴 리스트 하위레벨 보이는경우
@@ -122,39 +127,61 @@ const Menubar = () => {
      * @returns {JSX.Element}
      */
     const handleExpandDisabled = (nodeKey) => {
-
-        const isMenu2 = menu2.some(data => {
-            return data.nodeKey === nodeKey
-        });
-
         const isOpen = menuOpen[`nodeKey${nodeKey}`];
-        if (isMenu2) {
+        if (hasMenu2(nodeKey)) {
             return (
                 <Fragment>
-                    {!isOpen ? <ExpandLess/> : <ExpandMore/>}
+                    {!isOpen ? <ExpandLess /> : <ExpandMore />}
                 </Fragment>
-            )
+            );
         }
-    }
+    };
+
+    /**
+     * 메뉴2 화면 구성
+     * @param menu1Value
+     * @param menu2Value
+     * @param menu2Index
+     * @returns {JSX.Element}
+     */
+    const menu2Disabled = (menu1Value, menu2Value, menu2Index) => {
+        if (hasMenu2(menu1Value.nodeKey)) {
+
+            const isOpen = menuOpen[`nodeKey${menu2Value.nodeKey}`];
+            return (
+                <Fragment key={menu2Index}>
+                    <Collapse in={isOpen} timeout='auto' unmountOnExit>
+                        <List component='div' disablePadding>
+                            <ListItemButton sx={{ pl: 4 }} onClick={() => {
+                                onMenu2Handler(menu2Value);
+                            }}>
+                                <ListItemText primary={menu2Value.menuName} />
+                            </ListItemButton>
+                        </List>
+                    </Collapse>
+                </Fragment>
+            );
+        }
+    };
 
     return (
-        <Box sx={{display: 'flex'}}>
-            <CssBaseline/>
-            <AppBar position="fixed" open={open}>
+        <Box sx={{ display: 'flex' }}>
+            <CssBaseline />
+            <AppBar position='fixed' open={drawerOpen}>
                 <Toolbar>
                     <IconButton
-                        color="inherit"
-                        aria-label="open drawer"
-                        edge="end"
+                        color='inherit'
+                        aria-label='open drawer'
+                        edge='end'
                         onClick={handleDrawerOpen}
-                        sx={{...(open && {display: 'none'})}}
+                        sx={{ ...(drawerOpen && { display: 'none' }) }}
                     >
-                        <MenuIcon/>
+                        <MenuIcon />
                     </IconButton>
                 </Toolbar>
             </AppBar>
-            <Main open={open}>
-                <DrawerHeader/>
+            <Main open={drawerOpen}>
+                <DrawerHeader />
             </Main>
             <Drawer
                 sx={{
@@ -164,51 +191,42 @@ const Menubar = () => {
                         width: drawerWidth,
                     },
                 }}
-                variant="persistent"
-                anchor="left"
-                open={open}
+                variant='persistent'
+                anchor='left'
+                open={drawerOpen}
             >
                 <DrawerHeader>
                     <IconButton onClick={handleDrawerClose}>
-                        <ChevronLeftIcon/>
+                        <ChevronLeftIcon />
                     </IconButton>
                 </DrawerHeader>
-                <Divider/>
+                <Divider />
                 <List
-                    sx={{width: '100%', maxWidth: 360, bgcolor: 'background.paper'}}
-                    component="nav"
+                    sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
+                    component='nav'
                 >
-                    {menu1.map((value, index) => {
+                    {menu1.map((menu1Value, menu1Index) => {
                         return (
-                            <Fragment key={index}>
+                            <Fragment key={menu1Index}>
                                 <ListItemButton onClick={() => {
-                                    onMenu1Handler(value)
+                                    onMenu1Handler(menu1Value);
                                 }}>
-                                    <ListItemText primary={value.menuName}/>
-                                    {handleExpandDisabled(value.nodeKey)}
+                                    <ListItemText primary={menu1Value.menuName} />
+                                    {handleExpandDisabled(menu1Value.nodeKey)}
                                 </ListItemButton>
+                                {menu2.map((menu2Value, menu2Index) => {
+                                    return (
+                                        menu2Disabled(menu1Value, menu2Value, menu2Index)
+                                    );
+                                })}
                             </Fragment>
                         );
                     })}
-                    {menu2.map((value, index) => {
-                        const isOpen = menuOpen[`nodeKey${value.nodeKey}`];
-
-                        return (
-                            <Fragment key={index}>
-                                <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                                    <List component="div" disablePadding>
-                                        <ListItemButton sx={{pl: 4}} onClick={() => {onMenu2Handler(value)}}>
-                                            <ListItemText primary={value.menuName}/>
-                                        </ListItemButton>
-                                    </List>
-                                </Collapse>
-                            </Fragment>
-                        )
-                    })}
                 </List>
-                <Divider/>
+                <Divider />
             </Drawer>
         </Box>
     );
-}
+};
+
 export default Menubar;
