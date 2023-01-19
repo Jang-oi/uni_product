@@ -6,7 +6,7 @@ import axios from "axios";
 import Loading from "./component/Loding";
 import Menubar from "./component/Menubar";
 import Main from "./pages/Main";
-import SignIn from "./pages/SignIn";
+import SignIn from "./component/SignIn";
 import PublicRoute from "./router/PublicRoute";
 import PrivateRoute from "./router/PrivateRoute";
 import Calendar from "./pages/Calendar";

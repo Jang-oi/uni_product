@@ -1,13 +1,11 @@
+import { useCookies } from 'react-cookie';
+import { useState } from 'react';
 import { Avatar, Button, Checkbox, Container, FormControlLabel, Grid, TextField } from '@mui/material';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { useState } from 'react';
-import { useCookies } from 'react-cookie';
-import { serviceCall } from '../utils/callUtil';
+import axios from 'axios';
 
 const SignIn = () => {
-
-
     const [cookies, setCookie, removeCookie] = useCookies(['saveId']);
 
     // 초, 분, 시간, 날짜로 계산함.
@@ -50,16 +48,14 @@ const SignIn = () => {
      * 로그인 버튼 클릭시 이벤트
      * @param e
      */
-    const onSubmitHandler = async (e) => {
-        e.preventDefault();
-        const signInOptions = {
-            url : '/auth/login',
-            data: { id, pw },
-        };
-        if (isSave) setCookie('saveId', id, { maxAge: cookieMaxAge });
-        serviceCall.post(signInOptions);
-    };
 
+    const onSubmitHandler = (e) => {
+        e.preventDefault();
+        if (isSave) setCookie('saveId', id, { maxAge: cookieMaxAge });
+        axios.post('/auth/login', { id, pw })
+            .then(res => console.log(res))
+            .catch(err => console.log(err));
+    };
 
     return (
         <Container maxWidth='xs'>
@@ -121,6 +117,7 @@ const SignIn = () => {
             </Box>
         </Container>
     );
+
 };
 
 export default SignIn;

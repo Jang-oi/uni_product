@@ -1,7 +1,5 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import { serviceCall } from '../utils/callUtil';
 
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -15,6 +13,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { Collapse, List, ListItemButton, ListItemText } from '@mui/material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
+import { useFetch } from '../customHooks/useFetch';
 
 // LeftMenuWidth 값
 const drawerWidth = 300;
@@ -68,7 +67,6 @@ const Menubar = () => {
     const navigate = useNavigate();
 
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const [menuData, setMenuData] = useState({});
     const [menuOpen, setMenuOpen] = useState({});
 
     const handleDrawerOpen = () => {
@@ -79,17 +77,11 @@ const Menubar = () => {
         setDrawerOpen(false);
     };
 
-    useEffect(() => {
-        const menuOptions = {
-            url: '/getMenu',
-        };
-        serviceCall.post(menuOptions, (returnData) => {
-            setMenuData(returnData);
-        });
-    }, []);
+    const [menu] = useFetch({ url: '/getMenu', method: 'post' });
 
+    if (!menu) return;
+    const {menu1, menu2} = menu;
 
-    const { menu1 = [], menu2 = [] } = menuData;
     const onMenu1Handler = (menu1Value) => {
         const { nodeKey, component } = menu1Value;
 
@@ -205,7 +197,7 @@ const Menubar = () => {
                     sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
                     component='nav'
                 >
-                    {menu1.map((menu1Value, menu1Index) => {
+                    {menu1 && menu1.map((menu1Value, menu1Index) => {
                         return (
                             <Fragment key={menu1Index}>
                                 <ListItemButton onClick={() => {
@@ -214,7 +206,7 @@ const Menubar = () => {
                                     <ListItemText primary={menu1Value.menuName} />
                                     {handleExpandDisabled(menu1Value.nodeKey)}
                                 </ListItemButton>
-                                {menu2.map((menu2Value, menu2Index) => {
+                                {menu2 && menu2.map((menu2Value, menu2Index) => {
                                     return (
                                         menu2Disabled(menu1Value, menu2Value, menu2Index)
                                     );

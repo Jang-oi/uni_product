@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { customAlert } from './commonUtil';
 
-axios.defaults.baseURL = 'http://localhost:4000';
+// axios.defaults.baseURL = 'http://localhost:4000';
 
 export const tryCatchCall = (fn, errCallBackFn) => {
     try {
@@ -84,5 +84,11 @@ export const serviceCall = {
         axios.get(url, options)
             .then(response => callThen(response, callBackFn, errorCallBackFn))
             .catch(error => callCatch(error, errorCallBackFn));
+    },
+
+    post2: async (url, options) => {
+        const { data } = await axios.post(url, options);
+        console.log(data);
+        return data;
     },
 };
