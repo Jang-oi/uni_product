@@ -55,3 +55,26 @@ export const setLocaleString = (obj) => {
         }
     }
 };
+
+/**
+ *
+ * @param options
+ *  {
+ *      returnMessage : alert 화면에 보일 메세지
+ *      isError       : error 여부
+ *      timer         : alert 시간
+ *  }
+ * @param callBackFn
+ */
+export const uniAlert = (options, callBackFn) => {
+
+    const { returnMessage, isError, timer } = options;
+    const icon = (isError) ? 'error' : 'success';
+    customAlert({
+        icon, text: returnMessage, timer,
+    }).then(() => {
+        if (callBackFn) callBackFn();
+    }).catch(() => {
+        alert('customAlert 연결 실패!\n서버 담당자에게 연결 부탁드립니다.');
+    });
+};

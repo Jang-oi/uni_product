@@ -1,9 +1,8 @@
 import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 
-const PublicRoute = () => {
-    const isToken = localStorage.getItem('token');
-    return isToken ? <Navigate to='/' /> : <Outlet />;
+const PublicRoute = ({ token }) => {
+    return token ? <Navigate to='/' /> : <Outlet />;
 };
 
 export default PublicRoute;

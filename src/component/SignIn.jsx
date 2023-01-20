@@ -4,10 +4,15 @@ import { Avatar, Button, Checkbox, Container, FormControlLabel, Grid, TextField 
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import axios from 'axios';
+import { uniAlert } from '../utils/commonUtil';
+import { useNavigate } from 'react-router-dom';
+import { useAuthDispatch } from '../contexts/authContext';
+import { setLocalStorage } from '../utils/localStorage';
 
 const SignIn = () => {
     const [cookies, setCookie, removeCookie] = useCookies(['saveId']);
-
+    const navigate = useNavigate();
+    const authDispatch = useAuthDispatch();
     // 초, 분, 시간, 날짜로 계산함.
     const cookieMaxAge = 60 * 60 * 24 * 30;
 
@@ -53,7 +58,17 @@ const SignIn = () => {
         e.preventDefault();
         if (isSave) setCookie('saveId', id, { maxAge: cookieMaxAge });
         axios.post('/auth/login', { id, pw })
-            .then(res => console.log(res))
+            .then((res) => {
+                const responseData = res.data;
+                setLocalStorage('token', responseData.returnData.token);
+                authDispatch({
+                    type    : 'SET_AUTH',
+                    authInfo: responseData.returnData.authInfo,
+                });
+                uniAlert({ returnMessage: responseData.returnMessage, timer: 1000 }, () => {
+                    navigate('/');
+                });
+            })
             .catch(err => console.log(err));
     };
 
