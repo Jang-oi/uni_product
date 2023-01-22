@@ -1,5 +1,6 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from '../apis/uni';
 
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -13,7 +14,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { Collapse, List, ListItemButton, ListItemText } from '@mui/material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
-import { useFetch } from '../customHooks/useFetch';
+import { useAxios } from '../customHooks/useAxios';
 
 // LeftMenuWidth 값
 const drawerWidth = 300;
@@ -69,6 +70,8 @@ const Menubar = () => {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState({});
 
+    const [menu, axiosFetch] = useAxios();
+
     const handleDrawerOpen = () => {
         setDrawerOpen(true);
     };
@@ -77,14 +80,26 @@ const Menubar = () => {
         setDrawerOpen(false);
     };
 
-    const [menu] = useFetch({ url: '/getMenu', method: 'post' });
+    const getMenuData = () => {
+        axiosFetch({
+            axiosInstance: axios,
+            method       : 'POST',
+            url          : '/getMenu',
+        });
+    };
+
+    useEffect(() => {
+        getMenuData();
+        // eslint-disable-next-line
+    }, []);
 
     if (!menu) return;
-    const {menu1, menu2} = menu;
+    const { menu1, menu2 } = menu;
 
     const onMenu1Handler = (menu1Value) => {
         const { nodeKey, component } = menu1Value;
 
+        // 하위 메뉴가 존재하는지 체크
         if (hasMenu2(nodeKey)) {
             const key = `nodeKey${nodeKey}`;
             const isOpen = menuOpen[`nodeKey${nodeKey}`];

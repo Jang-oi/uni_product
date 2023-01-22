@@ -68,10 +68,10 @@ export const setLocaleString = (obj) => {
  */
 export const uniAlert = (options, callBackFn) => {
 
-    const { returnMessage, isError, timer } = options;
+    const { text, isError, timer } = options;
     const icon = (isError) ? 'error' : 'success';
     customAlert({
-        icon, text: returnMessage, timer,
+        icon, text, timer,
     }).then(() => {
         if (callBackFn) callBackFn();
     }).catch(() => {

@@ -1,7 +1,5 @@
 import { Container } from '@mui/material';
-import { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import axios from 'axios';
 
 import Loading from './component/Loding';
 import Menubar from './component/Menubar';
@@ -13,35 +11,14 @@ import Calendar from './pages/Calendar';
 import NotFound from './pages/NotFound';
 import License from './pages/License';
 import { getLocalStorage } from './utils/localStorage';
+import { useLoadingState } from './contexts/loadingContext';
 
 
 const App = () => {
 
-    const [loading, setLoading] = useState(false);
+    const loadingState = useLoadingState();
+    const { loading } = loadingState;
     const token = getLocalStorage('token');
-    /**
-     * axios then 이나 catch 처리되기 전의 요청 응답의 공통 기능 처리
-     */
-    axios.interceptors.request.use(
-        config => {
-            setLoading(true);
-            return config;
-        },
-        error => {
-            setLoading(true);
-            return Promise.reject(error);
-        },
-    );
-    axios.interceptors.response.use(
-        config => {
-            setLoading(false);
-            return config;
-        },
-        error => {
-            setLoading(false);
-            return Promise.reject(error);
-        },
-    );
 
     return (
         <Container>
